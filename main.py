@@ -47,7 +47,7 @@ def face_recognition_system():
     recognizer = cv2.face.LBPHFaceRecognizer_create()
 
 # Load your trained model
-    recognizer.read('trainer/trainer.yml')
+    recognizer.read('Jarvis/trainer/trainer.yml')
 
     authorized_labels = [1]  # Replace with your actual authorized labels
 

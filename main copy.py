@@ -11,6 +11,7 @@ from datetime import datetime
 import google.generativeai as genai
 import PIL.Image
 from googletrans import Translator
+import uuid
 
 recognizer = sr.Recognizer()
 MICROPHONE_INDEX = 1
@@ -19,14 +20,20 @@ engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[0].id)
 
-mode = "listening"
+mode = "text"  # Set default mode to text
+bypass_words = ["!","$","^","&","*","/","asteras"]
 
 def say(audio, speed_adjustment=0):
-    engine.say(audio)
-    engine.runAndWait()
-    rate = engine.getProperty('rate')   # Get the current rate
-    new_rate = rate + speed_adjustment
-    engine.setProperty('rate', new_rate)  # Adjust rate for slower speech
+
+    if any(word in audio.lower() for word in bypass_words):
+        print(f"Bypassed: {audio}")
+
+    else:
+        engine.say(audio)
+        engine.runAndWait()
+        rate = engine.getProperty('rate')  # Get the current rate
+        new_rate = rate + speed_adjustment
+        engine.setProperty('rate', new_rate)  # Adjust rate for slower speech
 
 def listen():
     with sr.Microphone(device_index=MICROPHONE_INDEX) as source:
@@ -44,6 +51,12 @@ def listen():
             print("Could not request results from Google Speech Recognition service")
         return ""
 
+def create_program_file(code):
+    filename = f"generated_program_{uuid.uuid4().hex}.py"  # Generate a unique filename
+    with open(filename, "w") as file:
+        file.write(code)
+    print(f"Program created: {filename}")
+
 def process_query(query):
 
     api_key = os.environ.get("API_KEY")
@@ -57,7 +70,6 @@ def process_query(query):
 
     MAX_LENGTH = 500  # Adjust this value as needed
 
-    # Provide a brief description if the response is too long
     if len(response.text) > MAX_LENGTH:
         brief_response = response.text[:MAX_LENGTH] + '...'  # Truncate and add ellipsis
     else:
@@ -66,14 +78,12 @@ def process_query(query):
     print(brief_response)
     say(brief_response)
 
-    # Add more sites
-    sites = [["youtube", "https://www.youtube.com"], ["wikipedia", "https://www.wikipedia.com"], ["google", "https://www.google.com"],]
+    sites = [["youtube", "https://www.youtube.com"], ["wikipedia", "https://www.wikipedia.com"], ["google", "https://www.google.com"]]
     for site in sites:
         if f"Open {site[0]}".lower() in query.lower():
             say(f"Opening {site[0]} sir...")
             webbrowser.open(site[1])
 
-    # Add a feature to play a specific song
     if "open music" in query:
         musicPath = "/Users/harry/Downloads/downfall-21371.mp3"
         os.system(f"open {musicPath}")
@@ -82,7 +92,7 @@ def process_query(query):
         say(random.choice(answers_8))
         hour = datetime.datetime.now().strftime("%H")
         min = datetime.datetime.now().strftime("%M")
-        say(f"Sir time is {hour} {min}")
+        say(f"Sir, the time is {hour}:{min}")
 
     elif "open facetime".lower() in query.lower():
         os.system(f"open /System/Applications/FaceTime.app")
@@ -96,6 +106,19 @@ def process_query(query):
     elif "reset chat".lower() in query.lower():
         chatStr = ""
 
+    if "make me a program" in query.lower():
+        say("What should the program be about?")
+        if mode == "listening":
+            description = listen()
+        else:
+            description = input("Enter the program description: ")
+        if description:
+            prompt = f"Generate a Python program that {description}"
+            response = model.generate_content(prompt)
+            code = response.text
+            create_program_file(code)
+        else:
+            say("Sorry, I didn't catch that. Please try again.")
 if __name__ == '__main__':
     print('Welcome to Jarvis')
     say("Welcome to Jarvis")
@@ -121,6 +144,5 @@ if __name__ == '__main__':
                 process_query(query)
 
         except sr.WaitTimeoutError:
-            # Handle the timeout error and continue listening
             print("Listening...")
             continue

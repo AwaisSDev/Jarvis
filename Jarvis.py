@@ -366,6 +366,14 @@ if __name__ == '__main__':
                 print("Switched to listening mode.")
                 say("Switched to listening mode.")
 
+            elif "what is the time" in query:
+                hour = datetime.datetime.now().strftime("%H")
+                min = datetime.datetime.now().strftime("%M")
+                say(f"Sir, the time is {hour}:{min}")
+
+            elif "jarvis exit" in query:
+                exit()
+
             elif "what question did i ask before" in query.lower():
                 if history:
                     last_entry = history[-1]

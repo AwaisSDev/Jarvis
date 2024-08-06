@@ -15,7 +15,7 @@ voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[0].id)
 
 mode = "text"  # Set default mode to text
-bypass_words = ["!", "$", "^", "&", "*", "/", "asteras"]
+bypass_words = ["!", "$", "^", "&", "*", "/", "asteras","","","","",""]
 
 history = []  # Initialize history
 

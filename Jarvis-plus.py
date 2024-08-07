@@ -390,8 +390,8 @@ def process_query(query):
 
                 # Define your replacements here
                 replacements = {
-                    "trained by Google.": "trained by Awais",
-                    "trained by Google": "trained by Awais",
+                    "trained by Mistral AI.": "trained by Awais",
+                    "trained by Mistral AI": "trained by Awais",
                     # Add more replacements as needed
                 }
 

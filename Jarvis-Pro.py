@@ -157,6 +157,13 @@ def process_query(query):
     client = Groq(api_key=api_key)
     model = "mixtral-8x7b-32768"
 
+    # Check the context for relevant previous queries
+    relevant_context = ""
+    if history:
+        last_query = history[-1]['query']
+        last_response = history[-1]['response']
+        relevant_context = f"Earlier you asked about '{last_query}', and I responded with '{last_response}'. "
+
     if "send email" in query.lower():
         say("Who is the recipient of the email?")
         to_email = listen() if mode == "listening" else input("Enter the recipient email address: ")
@@ -180,7 +187,7 @@ def process_query(query):
         else:
             description = input("Enter the program description: ")
         if description:
-            prompt = f"Generate a Python program that {description}"
+            prompt = f"{relevant_context}Generate a Python program that {description}"
             try:
                 chat_completion = client.chat.completions.create(
                     messages=[{"role": "user", "content": prompt}],
@@ -199,17 +206,18 @@ def process_query(query):
             return ""
     else:
         try:
+            prompt = f"{relevant_context}{query}"
             chat_completion = client.chat.completions.create(
-                messages=[{"role": "user", "content": query}],
+                messages=[{"role": "user", "content": prompt}],
                 model=model,
             )
             response_text = chat_completion.choices[0].message.content
-            MAX_LENGTH = 2000  # Shortened for brevity
+            MAX_LENGTH = 300  # Shortened for brevity
 
             # Define your replacements here
             replacements = {
-                "trained by Google.": "trained by Awais",
-                "trained by Google": "trained by Awais",
+                "trained by Groq.": "trained by Awais",
+                "trained by Groq": "trained by Awais",
                 # Add more replacements as needed
             }
 

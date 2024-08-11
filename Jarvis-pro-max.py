@@ -195,6 +195,16 @@ def process_query(query):
             say("Sorry, I didn't catch that. Please try again.")
         return ""
 
+    elif "tm" in query.lower():
+        mode = "text"
+        print("Switched to text mode.")
+        say("Switched to text mode.")
+
+    elif "lm" in query.lower():
+        mode = "listening"
+        print("Switched to listening mode.")
+        say("Switched to listening mode.")
+
     elif "make me a program" in query.lower():
         say("What should the program be about?")
         if mode == "listening":

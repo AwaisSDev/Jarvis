@@ -1,5 +1,4 @@
 import sys
-import threading
 import pyttsx3
 import speech_recognition as sr
 import os
@@ -13,9 +12,11 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from groq import Groq
 from PyQt5 import QtCore, QtGui, QtWidgets
-import concurrent.futures
 import queue
 from github import Github
+import pywhatkit as kit
+import time
+import pyautogui
 
 # Initialize the recognizer and text-to-speech engine
 recognizer = sr.Recognizer()
@@ -24,10 +25,8 @@ engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[0].id)
 
-# Create a queue for TTS requests and a lock for thread synchronization
+# Create a queue for TTS requests
 tts_queue = queue.Queue()
-tts_lock = threading.Lock()
-stop_event = threading.Event()
 
 mode = "text"  # Set default mode to text
 bypass_words = ["!", "$", "^", "&", "*", "/", "asteras", "😊"]
@@ -40,11 +39,10 @@ github_token = os.getenv("GITHUB_TOKEN")
 jarvis_folder = "h:/New Coding/Jarvis_IM/Jarvis"
 repo_name = "AwaisSDev/MadebyJarvis"
 
-
 if not github_token:
     raise ValueError("GitHub token is not set in the environment variables")
 
-def say(audio, speed_adjustment=0):
+def say(audio, speed_adjustment=4):
     # Handle specific replacements for pronunciation
     replacements = {
         "Awais": "ah-WASS",  # Pronunciation replacement
@@ -54,40 +52,29 @@ def say(audio, speed_adjustment=0):
     for old_word, new_word in replacements.items():
         audio = audio.replace(old_word, new_word)
 
+    # Split the audio text into sentences and process each sentence
     sentences = audio.split(". ")
     for sentence in sentences:
+        # Split the sentence into words and filter out bypass words
         words = sentence.split()
         filtered_words = [word for word in words if word.lower() not in bypass_words]
         filtered_sentence = " ".join(filtered_words)
 
+        # Add the filtered sentence to the TTS queue if it's not empty
         if filtered_sentence:
             tts_queue.put((filtered_sentence, speed_adjustment))
         else:
             print(f"Bypassed sentence: {sentence}")
 
-def tts_worker():
-    global engine
-    while not stop_event.is_set() or not tts_queue.empty():
+    # Process TTS queue
+    while not tts_queue.empty():
         text, speed_adjustment = tts_queue.get()
-        if text is None:
-            break
-        with tts_lock:
-            rate = engine.getProperty('rate')
-            new_rate = rate + speed_adjustment
-            engine.setProperty('rate', new_rate)
-            engine.say(text)
-            engine.runAndWait()
+        rate = engine.getProperty('rate')
+        new_rate = rate + speed_adjustment
+        engine.setProperty('rate', new_rate)
+        engine.say(text)
+        engine.runAndWait()
         tts_queue.task_done()
-
-def start_tts_worker():
-    tts_thread = threading.Thread(target=tts_worker)
-    tts_thread.start()
-    return tts_thread
-
-def stop_tts_worker(tts_thread):
-    stop_event.set()
-    tts_queue.put((None, 0))
-    tts_thread.join()
 
 def listen():
     with sr.Microphone(device_index=MICROPHONE_INDEX) as source:
@@ -95,7 +82,7 @@ def listen():
         print("Listening...")
         try:
             audio = recognizer.listen(source, timeout=10)
-            text = recognizer.recognize_google(audio, language='en-pk')
+            text = recognizer.recognize_google(audio, language='en-pk').lower() 
             print(f"You said: {text}")
             return text
         except sr.UnknownValueError:
@@ -251,12 +238,49 @@ def extract_code(response_text):
             code_lines.append(line)
     return "\n".join(code_lines)
 
-def start_listen():
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        future = executor.submit(listen)
-        return future.result()
+def load_contacts(file_path):
+    contacts = {}
+    try:
+        with open(file_path, 'r') as file:
+            for line in file:
+                line = line.strip()
+                if line:
+                    name, number = line.split(',', 1)  # Split on the first comma
+                    contacts[name.strip()] = number.strip()
+    except Exception as e:
+        print(f"Error loading contacts: {e}")
+    return contacts
 
-def process_query(query):
+contacts_file_path = ("Jarvis/numbers.txt")
+contacts = load_contacts(contacts_file_path)
+print (contacts)  # Load contacts once
+
+# Example of using contacts in a function
+def get_phone_number(name):
+    return contacts.get(name.lower(), None)
+
+#def start_listen():
+ #   with concurrent.futures.ThreadPoolExecutor() as executor:
+  #      future = executor.submit(listen)
+  #      return future.result()
+
+def extract_contact_name(query):
+    # Implement logic to extract contact name from the query
+    # For simplicity, assume the contact name is always at the start of the query
+    parts = query.split(" ", 2)
+    if len(parts) > 1:
+        return parts[1]  # Adjust this based on how the name is structured in the query
+    return ""
+
+def extract_message(query):
+    # Implement logic to extract message from the query
+    # Assume message starts after the contact name
+    parts = query.split(" ", 2)
+    if len(parts) > 2:
+        return parts[2]
+    return ""
+
+def process_query(query, contacts):
     global mode
     if not query.strip():  # Check if query is empty or just whitespace
         say("The query cannot be empty. Please provide a valid command.")
@@ -370,6 +394,48 @@ def process_query(query):
                     print(f"An error occurred: {e}")
                     say("An error occurred while updating the project.")
 
+    #elif "send whatsapp message" in query.lower():
+    #        say("Please provide the contact name.")
+    #        print("Please provide the contact name.")
+    #        contact_name = listen() if mode == "listening" else input("Enter the contact name: ")
+#
+    #        if not contact_name:
+     #           say("Contact name not provided. Please try again.")
+                #print("Contact name not provided. Please try again.")
+    #            return ""  # Return to prevent further execution if contact name is not provided
+#
+    #        phone_number = contacts.get(contact_name)
+#        if phone_number:
+    #            say("What is the message you want to send?")
+    #            print("What is the message you want to send?")
+    #            message = listen() if mode == "listening" else input("Enter the message: ")
+#
+    #            if not message:
+    #                say("Message not provided. Please try again.")
+    #                return ""  # Return to prevent further execution if message is not provided
+
+               # send_whatsapp_message(phone_number, message)
+            else:
+                print(f"No contact found for {contact_name}. Please provide the phone number.")
+                say(f"No contact found for {contact_name}. Please provide the phone number.")
+                phone_number = listen() if mode == "listening" else input("Enter the phone number: ")
+
+                if not phone_number:
+                    print("Phone number not provided. Please try again.")
+                    say("Phone number not provided. Please try again.")
+                    return ""  # Return to prevent further execution if phone number is not provided
+
+                print("What is the message you want to send?")
+                say("What is the message you want to send?")
+                message = listen() if mode == "listening" else input("Enter the message: ")
+
+                if not message:
+                    print("Message not provided. Please try again.")
+                    say("Message not provided. Please try again.")
+                    return ""  # Return to prevent further execution if message is not provided
+
+            return ""
+
     else:
         try:
             prompt = f"{relevant_context}{query}"
@@ -400,6 +466,21 @@ def process_query(query):
             print(f"An error occurred: {e}")
             say("An error occurred while processing your query.")
             return ""
+        
+
+def send_whatsapp_message(phone_number, message):
+    try:
+        # Open WhatsApp Web and send the message
+        kit.sendwhatmsg_instantly(phone_number, message)
+        
+        # Add a delay to ensure the tab is fully processed
+        time.sleep(5)  # Wait for 10 seconds to ensure the message is sent
+
+        print(f"WhatsApp message sent successfully to {phone_number}")
+        say(f"WhatsApp message sent successfully to {phone_number}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        say(f"An error occurred while sending the message: {e}")
 
 def update_history(query, response):
     history.append({"query": query, "response": response})
@@ -408,7 +489,6 @@ if __name__ == '__main__':
     print('Welcome to Jarvis')
     say("Welcome to Jarvis")
 
-    tts_thread = start_tts_worker()
 
     while True:
         try:
@@ -431,10 +511,23 @@ if __name__ == '__main__':
                 if not query:  # Skip empty input
                     continue
 
+            if not query.strip():  # Check if query is empty or just whitespace
+                say("The query cannot be empty. Please provide a valid command.")
+                continue
+
+            api_key = os.environ.get("GROQ_API_KEY")
+            if api_key is None:
+                raise ValueError("GROQ_API_KEY environment variable not set")
+
+            client = Groq(api_key=api_key)
+            model = "mixtral-8x7b-32768"
+            temperature=2,
+
             if query.lower() == "history":
                 for entry in history:
                     print(f"Query: {entry['query']}")
                     print(f"Response: {entry['response']}")
+
             elif "tm" in query.lower():
                 mode = "text"
                 print("Switched to text mode.")
@@ -450,10 +543,72 @@ if __name__ == '__main__':
                 min = datetime.datetime.now().strftime("%M")
                 say(f"Sir, the time is {hour}:{min}")
 
-            elif "jarvis exit" in query:
-                stop_tts_worker(tts_thread)
-                exit()
+            elif "send whatsapp message" in query.lower():
+                say("Please provide the contact name.")
+                contact_name = listen() if mode == "listening" else input("Enter the contact name: ").strip()
 
+                if not contact_name:
+                    say("Contact name not provided. Please try again.")
+                    print("Contact name not provided. Please try again.")
+                    
+
+                phone_number = contacts.get(contact_name.lower())
+                
+                if not phone_number:
+                    say("No contact found. Please provide the phone number.")
+                    phone_number = listen() if mode == "listening" else input("Enter the phone number: ").strip()
+
+                    if not phone_number:
+                        say("Phone number not provided. Please try again.")
+                        print("Phone number not provided. Please try again.")
+                        
+
+                say("What is the message you want to send?")
+                message = listen() if mode == "listening" else input("Enter the message: ").strip()
+
+                if not message:
+                    say("Message not provided. Please try again.")
+                    print("Message not provided. Please try again.")
+                    
+
+                send_whatsapp_message(phone_number, message)
+                
+
+            elif "se123nd whatsap123p message1235" in query.lower():
+                    say("Please provide the contact name.")
+                    contact_name = listen() if mode == "listening" else input("Enter the contact name: ")
+
+                    if not contact_name:
+                        say("Contact name not provided. Please try again.")
+                        print("Contact name not provided. Please try again.")
+
+                    phone_number = contacts.get(contact_name)
+
+                    if phone_number:
+                        say("What is the message you want to send?")
+                        print("What is the message you want to send?")
+                        message = listen() if mode == "listening" else input("Enter the message: ")
+
+                        if not message:
+                            say("Message not provided. Please try again.")
+                    else:
+                        print(f"No contact found for {contact_name}. Please provide the phone number.")
+                        say(f"No contact found for {contact_name}. Please provide the phone number.")
+                        phone_number = listen() if mode == "listening" else input("Enter the phone number: ")
+
+                        if not phone_number:
+                            print("Phone number not provided. Please try again.")
+                            say("Phone number not provided. Please try again.")
+                        print("What is the message you want to send?")
+                        say("What is the message you want to send?")
+                        message = listen() if mode == "listening" else input("Enter the message: ")
+
+                        if not message:
+                            print("Message not provided. Please try again.")
+                            say("Message not provided. Please try again.")
+
+                    send_whatsapp_message(phone_number, message)
+                    
             elif "what question did i ask before" in query.lower():
                 if history:
                     last_entry = history[-1]
@@ -463,8 +618,10 @@ if __name__ == '__main__':
                 else:
                     say("No previous questions found.")
 
+
+
             else:
-                response_text = process_query(query)
+                response_text = process_query(query, contacts)
                 update_history(query, response_text)
 
         except sr.WaitTimeoutError:

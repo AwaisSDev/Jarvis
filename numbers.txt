@@ -1,13 +1,4 @@
-Baba, +923006329919
-Mama, +923346077165
-Ahsan, +923201188611
-Awais, +923337146571
-baba, +923006329919
-mama, +923346077165
-mamma, +923346077165
-ahsan, +923201188611
-brother, +923201188611
-awais, +923337146571
-owais, +923337146571
-aunty, +966 58 379 0825
-zeeluapi, +92323 6009894
+"Put Your Contacts Here"
+like this
+abc, +1234567890
+in this format

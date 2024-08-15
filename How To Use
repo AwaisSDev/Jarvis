@@ -1,0 +1,39 @@
+This is my ai project named J.A.R.V.I.S
+
+----How to use----
+
+Download the code than extract the folder Then these steps ---->
+
+first of all add all API keys 
+
+GitHub API: For creating and updating repositories.
+Groq API: For generating Python code based on descriptions.
+Setup SMPT For email sending
+Setup whatsapp web to send whatsapp message
+Add your Contacts in Contact list
+Replace All dummy names like your-name, your-repo etc with original names
+install add liberies using pip {
+
+pip install pyttsx3
+pip install SpeechRecognition
+pip install opencv-python
+pip install pyqt5
+pip install PyQt5-sip
+pip install queue
+pip install PyGithub
+pip install pywhatkit
+pip install pyautogui
+pip install imaplib
+pip install email
+pip install face_recognition
+pip install groq  # If available, otherwise check the package's source for specific installation instructions
+
+-----Or-----
+
+One line command
+
+pip install pyttsx3 SpeechRecognition opencv-python pyqt5 PyQt5-sip queue PyGithub pywhatkit pyautogui imaplib email face_recognition groq
+
+}
+
+Get Your Groq Api Key and Github Api Too.

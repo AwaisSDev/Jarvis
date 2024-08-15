@@ -37,3 +37,5 @@ pip install pyttsx3 SpeechRecognition opencv-python pyqt5 PyQt5-sip queue PyGith
 }
 
 Get Your Groq Api Key and Github Api Too.
+
+After Getting APIS add them in environmental variable With Same Names As Above

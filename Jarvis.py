@@ -39,8 +39,8 @@ known_face_names = []
 history = []  # Initialize history
 
 github_token = os.getenv("GITHUB_TOKEN")
-jarvis_folder = "h:/New Coding/Jarvis_IM/Jarvis"
-repo_name = "AwaisSDev/MadebyJarvis"
+jarvis_folder = "Your Folder"
+repo_name = "YourUsername/YourRepo"
 
 if not github_token:
     raise ValueError("GitHub token is not set in the environment variables")
@@ -48,7 +48,7 @@ if not github_token:
 def say(audio, speed_adjustment=4): 
     # Handle specific replacements for pronunciation
     replacements = {
-        "Awais": "ah-WASS",  # Pronunciation replacement
+        "Old-World": "New-Word",  # Pronunciation replacement
         # Add more replacements as needed
     }
 
@@ -97,8 +97,8 @@ def listen():
 def send_email(subject, body, to_email):
     smtp_server = 'smtp.gmail.com'
     smtp_port = 587
-    from_email = 'mawais9171@gmail.com'
-    password = 'ipau ainb zjjt ajmk'
+    from_email = 'your email address'
+    password = 'your app password'
 
     msg = MIMEMultipart()
     msg['From'] = from_email
@@ -191,7 +191,7 @@ def upload_to_github(file_path, repo_name):
     print(f"Project has been stored to GitHub: {file_name}")
 
 def update_github_file(file_path, repo_name):
-    repo_name = "MadebyJarvis"
+    repo_name = "YourRepoName"
 
     github_token = os.getenv("GITHUB_TOKEN")
 
@@ -242,18 +242,8 @@ def extract_code(response_text):
     return "\n".join(code_lines)
 
 contacts = {
-    'Baba': '+923006329919',
-    'Ahsan': '+923201188611',
-    'Awais': '+923337146571',
-    'baba': '+923006329919',
-    'mama': '+923346077165',
-    'mamma': '+923346077165',
-    'ahsan':' +923201188611',
-    'brother': '+923201188611',
-    'awais': '+923337146571',
-    'owais':'+923337146571',
-    'aunty': '+966 58 379 0825',
-    'zeeluapi': '+92323 6009894',
+    'Example1': 'your contact number with country code',
+    'Example2': 'your contact number with country code',
 }
 
 
@@ -329,7 +319,7 @@ def process_query(query, contacts):
         return ""
     
     elif "check email" in query:
-        email_count = check_email("mawais9171@gmail.com", "nton ttyb xhgf mvlx")
+        email_count = check_email("YourEmailAddress", "YourAppPassword")
         if email_count is not None:
             response = f"You have {email_count} emails in your inbox."
         else:
@@ -360,7 +350,7 @@ def process_query(query, contacts):
 
                 if store_to_github:
                     say("Storing the project to your GitHub repository.")
-                    upload_to_github(file_path, "MadebyJarvis")
+                    upload_to_github(file_path, "YourRepoName")
                     print("Project has been stored to GitHub.")
 
                 say(f"Project {file_name} created successfully.")
@@ -447,12 +437,12 @@ def process_query(query, contacts):
                 model=model,
             )
             response_text = chat_completion.choices[0].message.content
-            MAX_LENGTH = 300  # Shortened for brevity
+            MAX_LENGTH = 300  # Shortened for brevity, Adjust Yourself
 
             # Define your replacements here
             replacements = {
-                "trained by Groq.": "trained by Awais",
-                "trained by Groq": "trained by Awais",
+                "trained by Groq.": "trained by Your-Name",
+                "trained by Groq": "trained by Your-Name",
                 # Add more replacements as needed
             }
 
@@ -476,7 +466,7 @@ def send_whatsapp_message(phone_number, message):
         kit.sendwhatmsg_instantly(phone_number, message)
         
         # Add a delay to ensure the tab is fully processed
-        time.sleep(5)  # Wait for 10 seconds to ensure the message is sent
+        time.sleep(5)  # Wait for 5 seconds to ensure the message is sent
 
         print(f"WhatsApp message sent successfully to {phone_number}")
         say(f"WhatsApp message sent successfully to {phone_number}")

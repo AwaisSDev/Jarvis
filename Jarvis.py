@@ -242,8 +242,8 @@ def extract_code(response_text):
     return "\n".join(code_lines)
 
 contacts = {
-    'Example1': 'your contact number with country code',
-    'Example2': 'your contact number with country code',
+    "example1": "+00000000000",  # replace with real numbers if you want
+    "example2": "+00000000001",
 }
 
 
@@ -386,28 +386,7 @@ def process_query(query, contacts):
                 except Exception as e:
                     print(f"An error occurred: {e}")
                     say("An error occurred while updating the project.")
-
-    #elif "send whatsapp message" in query.lower():
-    #        say("Please provide the contact name.")
-    #        print("Please provide the contact name.")
-    #        contact_name = listen() if mode == "listening" else input("Enter the contact name: ")
-#
-    #        if not contact_name:
-     #           say("Contact name not provided. Please try again.")
-                #print("Contact name not provided. Please try again.")
-    #            return ""  # Return to prevent further execution if contact name is not provided
-#
-    #        phone_number = contacts.get(contact_name)
-#        if phone_number:
-    #            say("What is the message you want to send?")
-    #            print("What is the message you want to send?")
-    #            message = listen() if mode == "listening" else input("Enter the message: ")
-#
-    #            if not message:
-    #                say("Message not provided. Please try again.")
-    #                return ""  # Return to prevent further execution if message is not provided
-
-               # send_whatsapp_message(phone_number, message)
+                    
             else:
                 print(f"No contact found for {contact_name}. Please provide the phone number.")
                 say(f"No contact found for {contact_name}. Please provide the phone number.")
@@ -588,11 +567,6 @@ if __name__ == '__main__':
                     
 
                 send_whatsapp_message(phone_number, message)
-                
-
-            elif "se123nd whatsap123p message1235" in query.lower():
-                    say("Please provide the contact name.")
-                    contact_name = listen() if mode == "listening" else input("Enter the contact name: ")
 
                     if not contact_name:
                         say("Contact name not provided. Please try again.")
